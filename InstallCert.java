@@ -1,3 +1,20 @@
+/**
+ * Originally from:
+ * http://blogs.sun.com/andreas/resource/InstallCert.java
+ *<p/>
+ * Use:
+ * java InstallCert hostname
+ * Example:
+ *  ` java InstallCert ecc.fedora.redhat.com `
+ *<p/>
+ * Note as of Java 11 you do not need to compile
+ * Then usage becomes
+ * java InstallCert.java hostname
+ * Example:
+ *  ` java InstallCert.java ecc.fedora.redhat.com `
+ *
+ */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All Rights Reserved.
  *
@@ -28,14 +45,6 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/**
- * Originally from:
- * http://blogs.sun.com/andreas/resource/InstallCert.java
- * Use:
- * java InstallCert hostname
- * Example:
- *% java InstallCert ecc.fedora.redhat.com
- */
 
 import java.net.Proxy;
 import java.net.Socket;
@@ -47,10 +56,6 @@ import java.security.MessageDigest;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-/**
- * Class used to add the server's certificate to the KeyStore
- * with your trusted certificates.
- */
 public class InstallCert {
 
     public static void main(String[] args) throws Exception {
@@ -109,11 +114,11 @@ public class InstallCert {
         if (passphrase == null) { passphrase = "changeit".toCharArray(); }
 
         File file = new File("jssecacerts");
-        if (file.isFile() == false) {
+        if (!file.isFile()) {
             char SEP = File.separatorChar;
             File dir = new File(System.getProperty("java.home") + SEP + "lib" + SEP + "security");
             file = new File(dir, "jssecacerts");
-            if (file.isFile() == false) {
+            if (!file.isFile()) {
                 file = new File(dir, "cacerts");
             }
         }
@@ -200,14 +205,14 @@ public class InstallCert {
         String alias = host + "-" + (k + 1);
         ks.setCertificateEntry(alias, cert);
 
-        OutputStream out = new FileOutputStream("jssecacerts");
+        OutputStream out = new FileOutputStream(file);
         ks.store(out, passphrase);
         out.close();
 
         System.out.println();
         System.out.println(cert);
         System.out.println();
-        System.out.println("Added certificate to keystore 'jssecacerts' using alias '" + alias + "'");
+        System.out.println("Added certificate to keystore '" + file.getAbsolutePath() + "' using alias '" + alias + "'");
     }
 
     private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();
@@ -236,10 +241,9 @@ public class InstallCert {
             // This change has been done due to the following resolution advised for Java 1.7+
             // http://infposs.blogspot.kr/2013/06/installcert-and-java-7.html
             return new X509Certificate[0];
-            //throw new UnsupportedOperationException();
         }
 
-        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        public void checkClientTrusted(X509Certificate[] chain, String authType) {
             throw new UnsupportedOperationException();
         }
 
